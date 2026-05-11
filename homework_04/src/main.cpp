@@ -42,7 +42,42 @@ int main(int argc, char* argv[]) {
 
     // Налаштування виводу: фіксована точність для зручності
     std::cout << std::fixed << std::setprecision(4);
+// 2. Основний цикл обробки кроків
+    while (input_file >> curr_timestamp >> curr_fl >> curr_fr >> curr_bl >> curr_br) {
+        
+        // Крок 1: Різниця імпульсів
+        long d_fl = curr_fl - prev_fl;
+        long d_fr = curr_fr - prev_fr;
+        long d_bl = curr_bl - prev_bl;
+        long d_br = curr_br - prev_br;
 
+        // Крок 2: Усереднення бортів
+        double d_left = static_cast<double>(d_fl + d_bl) / 2.0;
+        double d_right = static_cast<double>(d_fr + d_br) / 2.0;
+
+        // Крок 3: Переведення в метри
+        double dL = d_left * distance_per_tick;
+        double dR = d_right * distance_per_tick;
+
+        // Крок 4: Відстань центру та зміна кута
+        double d = (dL + dR) / 2.0;
+        double dtheta = (dR - dL) / WHEELBASE_M;
+
+        // Крок 5: Оновлення позиції (використовуємо середній кут на кроці)
+        x += d * std::cos(theta + dtheta / 2.0);
+        y += d * std::sin(theta + dtheta / 2.0);
+        theta += dtheta;
+
+        // Вивід результату: timestamp x y theta
+        std::cout << curr_timestamp << " " << x << " " << y << " " << theta << "\n";
+
+        // Оновлення попередніх значень для наступної ітерації
+        prev_timestamp = curr_timestamp;
+        prev_fl = curr_fl;
+        prev_fr = curr_fr;
+        prev_bl = curr_bl;
+        prev_br = curr_br;
+    }
   
 
     return 0;
